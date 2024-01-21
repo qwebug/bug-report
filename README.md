@@ -39,7 +39,7 @@
 
 #### #1 ***Crash Bug***
 
-*   ***(1)***  ***Crash Bug #1 ***
+*   ***(1)***  ***Crash Bug #1***
 
     ***URL:***  <https://github.com/heavyai/heavydb/issues/794#issue-1875017288>
 
@@ -86,7 +86,7 @@
 
 <!---->
 
-*   ***(2) Crash Bug #2 ***
+*   ***(2) Crash Bug #2***
 
     ***URL:*** <https://github.com/heavyai/heavydb/issues/795>
 
