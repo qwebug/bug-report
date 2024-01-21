@@ -43,7 +43,7 @@
 
     ***URL:***  <https://github.com/heavyai/heavydb/issues/794#issue-1875017288>
 
-    ***Brief Description：***Create table with ( special \<property> = value ) causes crash, after set EXECUTOR\_DEVICE='GPU'.
+    ***Brief Description:*** Create table with ( special \<property> = value ) causes crash, after set EXECUTOR\_DEVICE='GPU'.
 
     ***Status:***  Confirmed
 
@@ -90,7 +90,7 @@
 
     ***URL:*** <https://github.com/heavyai/heavydb/issues/795>
 
-    ***Brief Description：***Insert values after create table with ( page\_size = value (too small or large) ) causes crash, after set EXECUTOR\_DEVICE='GPU'.
+    ***Brief Description:*** Insert values after create table with ( page\_size = value (too small or large) ) causes crash, after set EXECUTOR\_DEVICE='GPU'.
 
     ***Status:*** Confirmed
 
@@ -168,7 +168,7 @@
 
     ***Status:*** Confirmed
 
-    ***Test Case: ***
+    ***Test Case:***
 
     ```sql
     -- SQL causes Crash Bug: 
@@ -269,7 +269,7 @@
 
     ***URL:*** <https://github.com/heavyai/heavydb/issues/806#issue-1921478252>
 
-    ***Brief Description: **\<column> NOT IN \<column(overflow)> *in WHERE condition brings errors,  when set EXECUTOR\_DEVICE 'GPU'.
+    ***Brief Description:*** \<column> NOT IN \<column(overflow)> *in WHERE condition brings errors,  when set EXECUTOR\_DEVICE 'GPU'.
 
     ***Status:*** None
 
@@ -298,7 +298,7 @@
 
     ***URL:*** <https://github.com/heavyai/heavydb/issues/814#issue-1948719430>
 
-    ***Brief Description: *** *SELECT \* FROM \<table> WHERE ((\<column> + \<column>) < \<column>) OR (\<column> = \<column>)* brings errors,  when set EXECUTOR\_DEVICE 'GPU'.
+    ***Brief Description:*** *SELECT \* FROM \<table> WHERE ((\<column> + \<column>) < \<column>) OR (\<column> = \<column>)* brings errors,  when set EXECUTOR\_DEVICE 'GPU'.
 
     ***Status:*** None
 
@@ -359,7 +359,7 @@
 
     ***URL:*** <https://github.com/heavyai/heavydb/issues/817#issue-1978920821>
 
-    ***Brief Description:*** * CAST(\<column>+\<column>(overflow) AS BOOLEAN)*  in WHERE condition brings errors,  when set EXECUTOR\_DEVICE 'GPU'.
+    ***Brief Description:*** *CAST(\<column>+\<column>(overflow) AS BOOLEAN)*  in WHERE condition brings errors,  when set EXECUTOR\_DEVICE 'GPU'.
 
     ***Status:*** None
 
@@ -425,7 +425,7 @@
 
     ***URL:*** <https://github.com/heavyai/heavydb/issues/805#issue-1921443785>
 
-    ***Brief Description:*** *SELECT DISTINCT \<column> FROM \<table> ORDER BY 1 DESC LIMIT 10 * brings different results , when set EXECUTOR\_DEVICE 'CPU' and 'GPU'.
+    ***Brief Description:*** *SELECT DISTINCT \<column> FROM \<table> ORDER BY 1 DESC LIMIT 10*  brings different results , when set EXECUTOR\_DEVICE 'CPU' and 'GPU'.
 
     ***Status:*** None
 
