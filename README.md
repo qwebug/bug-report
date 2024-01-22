@@ -31,7 +31,7 @@
 
     ***URL:*** <https://github.com/heterodb/pg-strom/issues/632#issue-1879172708>
 
-    ***Brief Description:*** *SELECT \* FROM (SELECT \<column> AS f1, \<column> AS f2 FROM table) AS table WHERE((f2) IN (f2, 1)) AND (NOT (f1 = ALL (SELECT \<column> FROM table)))  *causes crash, when pg\_strom.enabled is turned on.
+    ***Brief Description:*** *SELECT \* FROM (SELECT \<column> AS f1, \<column> AS f2 FROM table) AS table WHERE((f2) IN (f2, 1)) AND (NOT (f1 = ALL (SELECT \<column> FROM table)))* causes crash, when pg\_strom.enabled is turned on.
 
     ***Status:*** Fixed
 
@@ -169,7 +169,7 @@
 
     ***URL:*** <https://github.com/heterodb/pg-strom/issues/627#issue-1872960364>
 
-    ***Brief Description:*** SELECT \<table> FROM JOIN tables ON (CAST(\<decimal> AS MONEY)) brings error, when pg\_strom.enabled is turned on.
+    ***Brief Description:*** *SELECT \<table> FROM JOIN tables ON (CAST(\<decimal> AS MONEY))* brings error, when pg\_strom.enabled is turned on.
 
     ***Status:*** Fixed
 
@@ -1060,7 +1060,7 @@
 
     ***URL:***  <https://github.com/heavyai/heavydb/issues/794#issue-1875017288>
 
-    ***Brief Description:*** Create table with ( special \<property> = value ) causes crash, after set EXECUTOR\_DEVICE='GPU'.
+    ***Brief Description:*** *Create table with ( special \<property> = value )* causes crash, after set EXECUTOR\_DEVICE='GPU'.
 
     ***Status:***  Confirmed
 
@@ -1107,7 +1107,7 @@
 
     ***URL:*** <https://github.com/heavyai/heavydb/issues/795>
 
-    ***Brief Description:*** Insert values after create table with ( page\_size = value (too small or large) ) causes crash, after set EXECUTOR\_DEVICE='GPU'.
+    ***Brief Description:*** *Insert values after create table with ( page\_size = value (too small or large) )* causes crash, after set EXECUTOR\_DEVICE='GPU'.
 
     ***Status:*** Confirmed
 
@@ -1315,7 +1315,7 @@
 
     ***URL:*** <https://github.com/heavyai/heavydb/issues/814#issue-1948719430>
 
-    ***Brief Description:*** *SELECT \* FROM \<table> WHERE ((\<column> + \<column>) < \<column>) OR (\<column> = \<column>)* brings errors,  when set EXECUTOR\_DEVICE 'GPU'.
+    ***Brief Description:*** *SELECT \* FROM \<table> WHERE ((\<column> + \<column>) < \<column>) OR (\<column> = \<column>)*   brings errors,  when set EXECUTOR\_DEVICE 'GPU'.
 
     ***Status:*** None
 
@@ -2210,7 +2210,7 @@
 
     ***URL:*** <https://github.com/dask-contrib/dask-sql/issues/1228#issue-1904373563>
 
-    ***Brief Description:*** * SELECT (\<column> IN (\<string>, \<string>, (CASE \<column> WHEN \<string> THEN \<column> END ), ((\<column>)||(\<string>)))) FROM \<table>  * brings errors,  when using 'GPU'.
+    ***Brief Description:*** *SELECT (\<column> IN (\<string>, \<string>, (CASE \<column> WHEN \<string> THEN \<column> END ), ((\<column>)||(\<string>)))) FROM \<table>*  brings errors,  when using 'GPU'.
 
     ***Status:*** None
 
@@ -2446,7 +2446,7 @@
 
     ***URL:***<https://github.com/dask-contrib/dask-sql/issues/1277#issue-2015426552>
 
-    ***Brief Description:*** SELECT (((\<column> LIKE '\뽞^' ESCAPE 'M')) IS NULL) FROM \<tables>* brings errors,  when using 'GPU'.
+    ***Brief Description:*** *SELECT (((\<column> LIKE '\뽞^' ESCAPE 'M')) IS NULL) FROM \<tables>* brings errors,  when using 'GPU'.
 
     ***Status:*** None
 
@@ -2728,7 +2728,7 @@
 
     ***URL:*** <https://github.com/dask-contrib/dask-sql/issues/1233#issue-1904946380>
 
-    ***Brief Description:*** *SELECT (\<number> NOT BETWEEN (CASE ((\<column>)) WHEN (1) THEN 0 END ) AND (\<column>)) FROM \<table> * brings different results, when using CPU and GPU.
+    ***Brief Description:*** *SELECT (\<number> NOT BETWEEN (CASE ((\<column>)) WHEN (1) THEN 0 END ) AND (\<column>)) FROM \<table>*  brings different results, when using CPU and GPU.
 
     ***Status:*** None
 
