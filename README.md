@@ -126,13 +126,13 @@
 
 
 
-#### #2 Error Bug
+#### #2 GPU Error Bug
 
 *   ***(1)*** ***GPU Error Bug #1***
 
     ***URL:*** <https://github.com/heterodb/pg-strom/issues/626#issue-1872959404>
 
-    ***Brief Description:***  ***SELECT \<column> FROM JOIN tables ON (CAST(\<decimal> AS MONEY))*** brings error, when pg\_strom.enabled is turned on.
+    ***Brief Description:***  *SELECT \<column> FROM JOIN tables ON (CAST(\<decimal> AS MONEY))* brings error, when pg\_strom.enabled is turned on.
 
     ***Status:*** Fixed
 
@@ -767,7 +767,7 @@
 
 
 
-#### #3 Logic Bug
+#### #3 GPU Logic Bug
 
 *   ***(1)*** ***GPU Logic Bug #1***
 
@@ -1280,7 +1280,7 @@
 
 
 
-#### #2 Error Bug
+#### #2 GPU Error Bug
 
 *   ***(1)*** ***GPU Error Bug #1***
 
@@ -1401,7 +1401,7 @@
 
 
 
-#### #3 Logic Bug
+#### #3 GPU Logic Bug
 
 *   ***(1)*** ***GPU Logic Bug #1***
 
@@ -1645,7 +1645,7 @@
 
 
 
-#### #2 Error Bug
+#### #2 GPU Error Bug
 
 *   ***(1)*** ***GPU Error Bug #1***
 
@@ -2535,7 +2535,7 @@
 
 
 
-#### #3 Logic Bug
+#### #3 GPU Logic Bug
 
 *   ***(1)*** ***GPU Logic Bug #1***
 
