@@ -27,13 +27,1030 @@
 
 #### &#x20;#1 Crash Bug
 
-*
+*   ***(1)*** ***Crash Bug #1***
 
-&#x9;&#x20;
+    ***URL:*** <https://github.com/heterodb/pg-strom/issues/632#issue-1879172708>
+
+    ***Brief Description:*** *SELECT \* FROM (SELECT \<column> AS f1, \<column> AS f2 FROM table) AS table WHERE((f2) IN (f2, 1)) AND (NOT (f1 = ALL (SELECT \<column> FROM table)))  *causes crash, when pg\_strom.enabled is turned on.
+
+    ***Status:*** Fixed
+
+    ***Test Case:***
+
+    ```sql
+    CREATE TABLE t0 (c1 float, c2 decimal(40, 20));
+    INSERT INTO t0 VALUES (1,0.1);
+    CREATE SCHEMA extensions;
+    CREATE EXTENSION pg_strom WITH SCHEMA extensions;
+
+    -- SQL executes on the CPU: 
+    set pg_strom.enabled=off;
+    SELECT * FROM
+            (SELECT c2 AS f1,
+                    c1 AS f2
+             FROM t0) AS t3
+          WHERE((f2) IN (f2, 1))
+            AND (NOT (f1 = ALL
+                        (SELECT c2
+                         FROM t0)));
+    -- Result:
+     f22 | f23 
+    -----+-----
+    (0 rows)
+
+    -- SQL executes on the GPU: 
+    set pg_strom.enabled=on;
+    SELECT * FROM
+            (SELECT c2 AS f1,
+                    c1 AS f2
+             FROM t0) AS t3
+          WHERE((f2) IN (f2, 1))
+            AND (NOT (f1 = ALL
+                        (SELECT c2
+                         FROM t0)));
+    -- Result:
+    server closed the connection unexpectedly
+    This probably means the server terminated abnormally before or while processing the request.
+    error: connection to server was lost
+    ```
+
+
+
+*   ***(2)*** ***Crash Bug #2***
+
+    ***URL:*** <https://github.com/heterodb/pg-strom/issues/634#issue-1879173211>
+
+    ***Brief Description:*** *SELECT MIN(\<column>) FROM table LEFT OUTER JOIN (SELECT \<column> FROM table) AS sub0 ON (\<column> > 0) GROUP BY (\<column>) HAVING BOOL\_AND(TRUE)*  causes crash, when pg\_strom.enabled is turned on.
+
+    ***Status:*** Fixed
+
+    ***Test Case:***
+
+    ```sql
+    CREATE TABLE t1(c0 int);
+    CREATE TABLE t2(LIKE t1);
+    INSERT INTO t1(c0) VALUES(1);
+    INSERT INTO t2(c0) VALUES(1);
+    CREATE SCHEMA extensions;
+    CREATE EXTENSION pg_strom WITH SCHEMA extensions;
+
+    -- SQL executes on the CPU: 
+    set pg_strom.enabled=off;
+    SELECT MIN(t2.c0)
+    FROM t2
+    LEFT OUTER JOIN
+        (SELECT c0 FROM t1) AS sub0 
+            ON (t2.c0 > 0) 
+    GROUP BY (t2.c0)
+    HAVING BOOL_AND(TRUE);
+    -- Result:
+     min 
+    -----
+       1
+    (1 row)
+
+    -- SQL executes on the GPU: 
+    set pg_strom.enabled=on;
+    SELECT MIN(t2.c0)
+    FROM t2
+    LEFT OUTER JOIN
+        (SELECT c0 FROM t1) AS sub0 
+            ON (t2.c0 > 0) 
+    GROUP BY (t2.c0)
+    HAVING BOOL_AND(TRUE);
+    -- Result:
+    server closed the connection unexpectedly
+    This probably means the server terminated abnormally before or while processing the request.
+    error: connection to server was lost
+    ```
+
+
 
 #### #2 Error Bug
 
-#### &#x20;#3 Logic Bug
+*   ***(1)*** ***GPU Error Bug #1***
+
+    ***URL:*** <https://github.com/heterodb/pg-strom/issues/626#issue-1872959404>
+
+    ***Brief Description:***  ***SELECT \<column> FROM JOIN tables ON (CAST(\<decimal> AS MONEY))*** brings error, when pg\_strom.enabled is turned on.
+
+    ***Status:*** Fixed
+
+    ***Test Case:***
+
+    ```sql
+    CREATE TABLE t1(c0 INT);
+    CREATE TABLE t2(LIKE t1);
+    INSERT INTO t2(c0) VALUES(1);
+    INSERT INTO t1(c0) VALUES(1);
+    CREATE SCHEMA extensions;
+    CREATE EXTENSION pg_strom WITH SCHEMA extensions;
+
+    -- SQL executes on the CPU: 
+    set pg_strom.enabled=off;
+    SELECT t2.c0 FROM t1 RIGHT OUTER JOIN t2 ON ((CAST(0.1 AS MONEY)) IN (CAST(0.1 AS MONEY)));
+    -- Result:
+     c0 
+    ----
+      1
+    (1 row)
+
+    -- SQL executes on the GPU: 
+    set pg_strom.enabled=on;
+    SELECT t2.c0 FROM t1 RIGHT OUTER JOIN t2 ON ((CAST(0.1 AS MONEY)) IN (CAST(0.1 AS MONEY)));
+    -- Result:
+    ERROR:  gpu_service.c:1794  failed on cuEventSynchronize: CUDA_ERROR_ILLEGAL_ADDRESS
+    HINT:  device at GPU-0, function at gpuservHandleGpuTaskExec
+    ```
+
+
+
+*   ***(2)*** ***GPU Error Bug #2***
+
+    ***URL:*** <https://github.com/heterodb/pg-strom/issues/627#issue-1872960364>
+
+    ***Brief Description:*** SELECT \<table> FROM JOIN tables ON (CAST(\<decimal> AS MONEY)) brings error, when pg\_strom.enabled is turned on.
+
+    ***Status:*** Fixed
+
+    ***Test Case:***
+
+    ```sql
+    CREATE TABLE t1(c0 INT);
+    CREATE TABLE t2(LIKE t1);
+    INSERT INTO t2(c0) VALUES(1);
+    INSERT INTO t1(c0) VALUES(1);
+    CREATE SCHEMA extensions;
+    CREATE EXTENSION pg_strom WITH SCHEMA extensions;
+
+    -- SQL executes on the CPU: 
+    set pg_strom.enabled=off;
+    SELECT t2 FROM t1 RIGHT OUTER JOIN t2 ON ((CAST(0.1 AS MONEY)) IN (CAST(0.1 AS MONEY)));
+    -- Result:
+     t2  
+    -----
+     (1)
+    (1 row)
+
+    -- SQL executes on the GPU: 
+    set pg_strom.enabled=on;
+    SELECT t2 FROM t1 RIGHT OUTER JOIN t2 ON ((CAST(0.1 AS MONEY)) IN (CAST(0.1 AS MONEY)));
+    -- Result:
+    ERROR:  cache lookup failed for attribute 0 of relation 203291
+    ```
+
+
+
+*   ***(3)*** ***GPU Error Bug #3***
+
+    ***URL:*** <https://github.com/heterodb/pg-strom/issues/625#issue-1869130388>
+
+    ***Brief Description:*** *(1) Create 2 tables and drop out some of values in one of these table (2) Using LEFT OUTER JOIN 2 tables*  brings error, when pg\_strom.enabled is turned on.
+
+    ***Status:*** Fixed
+
+    ***Test Case:***
+
+    ```sql
+    CREATE TABLE IF NOT EXISTS t0(c0 int , c1 int);
+    INSERT INTO t0(c0, c1) VALUES(0, 1);
+    CREATE TABLE IF NOT EXISTS t1(LIKE t0);
+    ALTER TABLE t0 DROP c1;
+    CREATE SCHEMA extensions;
+    CREATE EXTENSION pg_strom WITH SCHEMA extensions;
+
+    -- SQL executes on the CPU: 
+    set pg_strom.enabled=off;
+    SELECT * FROM t1 LEFT OUTER JOIN t0 ON (t1.c0 = t1.c1);
+    -- Result:
+    c0 | c1 | c0
+    ----+----+----
+
+
+    -- SQL executes on the GPU: 
+    set pg_strom.enabled=on;
+    SELECT * FROM t1 LEFT OUTER JOIN t0 ON (t1.c0 = t1.c1);
+    -- Result:
+    ERROR:  type with OID 0 does not exist
+    ```
+
+
+
+*   ***(4)*** ***GPU Error Bug #4***
+
+    ***URL:*** <https://github.com/heterodb/pg-strom/issues/624#issue-1868559021>
+
+    ***Brief Description:***  *SUM(\<money column>)* brings error, when pg\_strom.enabled is turned on.
+
+    ***Status:*** Fixed
+
+    ***Test Case:***
+
+    ```sql
+    CREATE TABLE IF NOT EXISTS t1(c0 money , c1 money);
+    INSERT INTO t1(c0, c1) VALUES(1, 1);
+    CREATE SCHEMA extensions;
+    CREATE EXTENSION pg_strom WITH SCHEMA extensions;
+
+    -- SQL executes on the CPU: 
+    set pg_strom.enabled=off;
+    SELECT SUM(t1.c1) FROM t1;
+    -- Result:
+      sum  
+    -------
+     $1.00
+
+    -- SQL executes on the GPU: 
+    set pg_strom.enabled=on;
+    SELECT SUM(t1.c1) FROM t1;
+    -- Result:
+    ERROR:  Catalog corruption? 'psum(money)' was not found
+    ```
+
+
+
+*   ***(5)*** ***GPU Error Bug #5***
+
+    ***URL:*** <https://github.com/heterodb/pg-strom/issues/631>
+
+    ***Brief Description:***  *WITH MYWITH AS ((SELECT 1 AS f1 FROM (SELECT "c2" AS f6 FROM table) AS table INNER JOIN (SELECT "c1" AS f5 FROM table) AS table ON (( ((f5) IN (f6))) AND ((1 > ((f6)::bigint >> 5)) IS FALSE)) ) ) SELECT \* FROM MYWITH*  brings error, when pg\_strom.enabled is turned on.
+
+    ***Status:*** Fixed
+
+    ***Test Case:***
+
+    ```sql
+    create table t0 (
+    "c0" bigint ,
+    "c1" float ,
+    "c2" decimal(40, 20) 
+    );
+    insert into t0 values (0.1,1,0.1);
+    create table t1 (
+    "c0" bigint ,
+    "c1" float ,
+    "c2" decimal(40, 20) 
+    );
+    insert into t1 values (0.1,1,0.1);
+    CREATE SCHEMA extensions;
+    CREATE EXTENSION pg_strom WITH SCHEMA extensions;
+
+    -- SQL executes on the CPU: 
+    set pg_strom.enabled=off;
+    WITH MYWITH AS 
+    SELECT 1 AS f1
+       FROM  (SELECT "c2" AS f6 FROM t0) AS t1 
+        INNER JOIN  (SELECT "c1" AS f5 FROM t1) AS t2  
+        ON (( ((f5)  IN (f6))) AND ((1 > ((f6)::bigint >> 5)) IS FALSE)) 
+    SELECT * FROM MYWITH;
+    -- Result:
+     f1 
+    ----
+    (0 rows)
+
+    -- SQL executes on the GPU: 
+    set pg_strom.enabled=on;
+    WITH MYWITH AS 
+    SELECT 1 AS f1
+       FROM  (SELECT "c2" AS f6 FROM t0) AS t1 
+        INNER JOIN  (SELECT "c1" AS f5 FROM t1) AS t2  
+        ON (( ((f5)  IN (f6))) AND ((1 > ((f6)::bigint >> 5)) IS FALSE)) 
+    SELECT * FROM MYWITH;
+    -- Result:
+    ERROR:  gpu_service.c:1794  failed on cuEventSynchronize: CUDA_ERROR_ASSERT
+    HINT:  device at GPU-0, function at gpuservHandleGpuTaskExec
+    ```
+
+
+
+*   ***(6)*** ***GPU Error Bug #6***
+
+    ***URL:*** <https://github.com/heterodb/pg-strom/issues/633#issue-1879172953>
+
+    ***Brief Description:***  *SELECT AVG(decimal) FROM table GROUP BY \<column>* brings error, when pg\_strom.enabled is turned on.
+
+    ***Status:*** Fixed
+
+    ***Test Case:***
+
+    ```sql
+    CREATE TABLE t0(c0 INT );
+    INSERT INTO t0(c0) VALUES(1);
+    CREATE SCHEMA extensions;
+    CREATE EXTENSION pg_strom WITH SCHEMA extensions;
+
+    -- SQL executes on the CPU:
+    SET pg_strom.enabled=off;
+    SELECT AVG(0.1) FROM t0 GROUP BY t0.c0;
+    -- Result:
+              avg           
+    ------------------------
+     0.10000000000000000000
+    (1 row)
+
+    -- SQL executes on the GPU: 
+    SET pg_strom.enabled=on;
+    SELECT AVG(0.1) FROM t0 GROUP BY t0.c0;
+    -- Result:
+    ERROR:  Catalog corruption? 'avg_num(bytea)' was not found
+    ```
+
+
+
+*   ***(7)*** ***GPU Error Bug #7***
+
+    ***URL:*** <https://github.com/heterodb/pg-strom/issues/635#issue-1879173391>
+
+    ***Brief Description:***  *SELECT MIN(\<column>) FROM table GROUP BY \<column> HAVING CAST((MIN('1')) AS BOOLEAN)*  brings error, when pg\_strom.enabled is turned on.
+
+    ***Status:*** Fixed
+
+    ***Test Case:***
+
+    ```sql
+    CREATE TABLE t0(c0 int , c1 int );
+    INSERT INTO t0(c0, c1) VALUES(1, 1);
+    CREATE SCHEMA extensions;
+    CREATE EXTENSION pg_strom WITH SCHEMA extensions;
+
+    -- SQL executes on the CPU:
+    set pg_strom.enabled=off;
+    SELECT MIN(c0) FROM t0 GROUP BY t0.c0 HAVING CAST((MIN('1')) AS BOOLEAN);
+    -- Result:
+     min 
+    -----
+       1
+    (1 row)
+
+    -- SQL executes on the GPU: 
+    set pg_strom.enabled=on;
+    SELECT MIN(c0) FROM t0 GROUP BY t0.c0 HAVING CAST((MIN('1')) AS BOOLEAN);
+    -- Result:
+    ERROR:  cache lookup failed for type 0
+    ```
+
+
+
+*   ***(8)*** ***GPU Error Bug #8***
+
+    ***URL:*** <https://github.com/heterodb/pg-strom/issues/636#issue-1879173588>
+
+    ***Brief Description:***  *SELECT MAX(\<column>) FROM table GROUP BY \<column> HAVING \<column> < MIN(\<column>)* brings error, when pg\_strom.enabled is turned on.
+
+    ***Status:*** Fixed
+
+    ***Test Case:***
+
+    ```sql
+    CREATE TABLE t0(c0 INT , c1 INT  PRIMARY KEY );
+    INSERT INTO t0(c1, c0) VALUES(1, 1);
+    CREATE SCHEMA extensions;
+    CREATE EXTENSION pg_strom WITH SCHEMA extensions;
+
+    -- SQL executes on the CPU:
+    set pg_strom.enabled=off;
+    SELECT MAX(c0) FROM t0 GROUP BY t0.c1 HAVING t0.c0<MIN(t0.c0);
+    -- Result:
+     max 
+    -----
+    (0 rows)
+
+    -- SQL executes on the GPU: 
+    set pg_strom.enabled=on;
+    SELECT MAX(c0) FROM t0 GROUP BY t0.c1 HAVING t0.c0<MIN(t0.c0);
+    -- Result:
+    ERROR:  Bug? referenced variable is grouping-key nor its dependent key: {VAR :varno 1 :varattno 1 :vartype 23 :vartypmod -1 :varcollid 0 :varlevelsup 0 :varnosyn 1 :varattnosyn 1 :location 45}
+    ```
+
+
+
+<!---->
+
+*   ***(9)*** ***GPU Error Bug #9***
+
+    ***URL:*** <https://github.com/heterodb/pg-strom/issues/680#issue-2003740688>
+
+    ***Brief Description:***  *SELECT \<columns> FROM \<table> FULL OUTER JOIN \<table> ON \<columns> IN \<columns> WHERE (\<columns>) IN (\<MONEY>)) ISNULL* brings error, when pg\_strom.enabled is turned on.
+
+    ***Status:*** Fixed
+
+    ***Test Case:***
+
+    ```sql
+    CREATE TABLE t0(c0 money, c1 BIT, c2 inet);
+    CREATE TABLE IF NOT EXISTS t1(LIKE t0);
+    INSERT INTO t1(c2, c0) VALUES('45.143.62.35', (1.0)::MONEY);
+    INSERT INTO t0(c1, c0, c2) VALUES('B1', CAST(0.5 AS MONEY), '83.157.203.154');
+    CREATE SCHEMA extensions;
+    CREATE EXTENSION pg_strom WITH SCHEMA extensions;
+
+    -- SQL executes on the CPU:
+    set pg_strom.enabled=off;
+    SELECT t1.c1, t0.c2 FROM t1 FULL OUTER JOIN t0 ON (t0.c2) IN (t1.c2) WHERE ((t0.c0) IN ((0.1)::MONEY)) ISNULL;
+    -- Result:
+    ERROR:  could not format inet value: Address family not supported by protocol
+
+    -- SQL executes on the GPU: 
+    set pg_strom.enabled=on;
+    SELECT t1.c1, t0.c2 FROM t1 FULL OUTER JOIN t0 ON (t0.c2) IN (t1.c2) WHERE ((t0.c0) IN ((0.1)::MONEY)) ISNULL;
+    -- Result:
+     c1 | c2 
+    ----+----
+        | 
+    (1 row)
+    ```
+
+
+
+*   ***(10)*** ***GPU Error Bug #10***
+
+    ***URL:*** <https://github.com/heterodb/pg-strom/issues/637#issue-1879173902>
+
+    ***Brief Description:***  *SELECT \<column> FROM table GROUP BY \<column> HAVING NOT (MIN(integer > 65535 ))::BOOLEAN*  brings error, when pg\_strom.enabled is turned on.
+
+    ***Status:*** Fixed
+
+    ***Test Case:***
+
+    ```sql
+    CREATE TABLE t1(c0 int) USING heap;
+    SET enable_seqscan=0;
+    INSERT INTO t1(c0) VALUES(1);
+    CREATE SCHEMA extensions;
+    CREATE EXTENSION pg_strom WITH SCHEMA extensions;
+
+    -- SQL executes on the CPU:
+    set pg_strom.enabled=off;
+    SELECT c0 FROM t1 GROUP BY t1.c0 HAVING NOT (MIN(65536))::BOOLEAN;
+    -- Result:
+     c0 
+    ----
+    (0 rows)
+
+    -- SQL executes on the GPU: 
+    set pg_strom.enabled=on;
+    SELECT c0 FROM t1 GROUP BY t1.c0 HAVING NOT (MIN(65536))::BOOLEAN;
+    -- Result:
+    ERROR:  gpu_service.c:1794  failed on cuEventSynchronize: CUDA_ERROR_MISALIGNED_ADDRESS
+    HINT:  device at GPU-0, function at gpuservHandleGpuTaskExec
+    ```
+
+
+
+*   ***(11)*** ***GPU Error Bug #11***
+
+    ***URL:*** <https://github.com/heterodb/pg-strom/issues/642#issue-1898642594>
+
+    ***Brief Description:***  *SELECT (length(\<column>) IN (\<decimal>, \<decimal>))::INT FROM \<table> CROSS JOIN \<table> WHERE length(\<column>) IN (\<column>)*  brings error, when pg\_strom.enabled is turned on.
+
+    ***Status:*** Fixed
+
+    ***Test Case:***
+
+    ```sql
+    CREATE TABLE t0(c0 bigserial,  c2 TEXT) ;
+    CREATE TABLE t1(LIKE t0 );
+    INSERT INTO t1(c0, c2) VALUES('111', '111');
+    INSERT INTO t0(c2) VALUES('111');
+    CREATE SCHEMA extensions;
+    CREATE EXTENSION pg_strom WITH SCHEMA extensions;
+
+    -- SQL executes on the CPU:
+    set pg_strom.enabled=off;
+    SELECT (length(t1.c2) IN (0.0, 1.0))::INT FROM t0 CROSS JOIN t1 WHERE length(t1.c2) IN (t0.c0);
+    -- Result:
+     int4 
+    ------
+    (0 rows)
+
+
+    -- SQL executes on the GPU: 
+    set pg_strom.enabled=on;
+    SELECT (length(t1.c2) IN (0.0, 1.0))::INT FROM t0 CROSS JOIN t1 WHERE length(t1.c2) IN (t0.c0);
+    -- Result:
+    ERROR:  gpu_service.c:1300  device type pointer for opcode:27 not found.
+    HINT:  device at GPU-0, function at gpuservHandleOpenSession
+    ```
+
+
+
+<!---->
+
+*   ***(12)*** ***GPU Error Bug #12***
+
+    ***URL:*** <https://github.com/heterodb/pg-strom/issues/643#issue-1898643865>
+
+    ***Brief Description:*** *SELECT \* FROM \<table> LEFT OUTER JOIN \<table> ON FALSE CROSS JOIN (SELECT \* FROM \<table> WHERE TRUE ORDER BY \<column> ASC, \<column> DESC) AS sub*  brings error, when pg\_strom.enabled is turned on.
+
+    ***Status:*** Fixed
+
+    ***Test Case:***
+
+    ```sql
+    CREATE TABLE t0(c0 int, UNIQUE(c0));
+    CREATE TABLE t1(LIKE t0);
+    INSERT INTO t0 VALUES(1);
+    INSERT INTO t1 VALUES(1);
+    CREATE SCHEMA extensions;
+    CREATE EXTENSION pg_strom WITH SCHEMA extensions;
+
+    -- SQL executes on the CPU:
+    set pg_strom.enabled=off;
+    SELECT * FROM t0 LEFT OUTER JOIN t1 ON FALSE CROSS JOIN (SELECT * FROM t0, t1 WHERE TRUE ORDER BY t0.c0 ASC, t1.c0 DESC) AS sub;
+    -- Result:
+     c0 | c0 | c0 | c0 
+    ----+----+----+----
+      1 |    |  1 |  1
+    (1 row)
+
+    -- SQL executes on the GPU: 
+    set pg_strom.enabled=on;
+    SELECT * FROM t0 LEFT OUTER JOIN t1 ON FALSE CROSS JOIN (SELECT * FROM t0, t1 WHERE TRUE ORDER BY t0.c0 ASC, t1.c0 DESC) AS sub;
+    -- Result:
+    ERROR:  Bug? unknown path-node: {INCREMENTALSORTPATH :pathtype 44 :parent_relids (b) :pathtarget {PATHTARGET :exprs ({VAR :varno 1 :varattno 1 :vartype 23 :vartypmod -1 :varcollid 0 :varlevelsup 0 :varnosyn 1 :varattnosyn 1 :location 65} {VAR :varno 2 :varattno 1 :vartype 23 :vartypmod -1 :varcollid 0 :varlevelsup 0 :varnosyn 2 :varattnosyn 1 :location 65}) :sortgrouprefs  1 2 :cost.startup 0.00 :cost.per_tuple 0.00 :width 8 :has_volatile_expr 0} :required_outer (b) :parallel_aware false :parallel_safe true :parallel_workers 0 :rows 6502500 :startup_cost 259.69 :total_cost 751278.70 :pathkeys ({PATHKEY :pk_eclass {EQUIVALENCECLASS :ec_opfamilies (o 1976) :ec_collation 0 :ec_members ({EQUIVALENCEMEMBER :em_expr {VAR :varno 1 :varattno 1 :vartype 23 :vartypmod -1 :varcollid 0 :varlevelsup 0 :varnosyn 1 :varattnosyn 1 :location 65} :em_relids (b 1) :em_nullable_relids (b) :em_is_const false :em_is_child false :em_datatype 23}) :ec_sources <> :ec_derives <> :ec_relids (b 1) :ec_has_const false :ec_has_volatile false :ec_below_outer_join false :ec_broken false :ec_sortref 1 :ec_min_security 4294967295 :ec_max_security 0} :pk_opfamily 1976 :pk_strategy 1 :pk_nulls_first false} {PATHKEY :pk_eclass {EQUIVALENCECLASS :ec_opfamilies (o 1976) :ec_collation 0 :ec_members ({EQUIVALENCEMEMBER :em_expr {VAR :varno 2 :varattno 1 :vartype 23 :vartypmod -1 :varcollid 0 :varlevelsup 0 :varnosyn 2 :varattnosyn 1 :location 65} :em_relids (b 2) :em_nullable_relids (b) :em_is_const false :em_is_child false :em_datatype 23}) :ec_sources <> :ec_derives <> :ec_relids (b 2) :ec_has_const false :ec_has_volatile false :ec_below_outer_join false :ec_broken false :ec_sortref 2 :ec_min_security 4294967295 :ec_max_security 0} :pk_opfamily 1976 :pk_strategy 5 :pk_nulls_first true}) :subpath {NESTPATH :pathtype 38 :parent_relids (b 1 2) :pathtarget {PATHTARGET :exprs ({VAR :varno 1 :varattno 1 :vartype 23 :vartypmod -1 :varcollid 0 :varlevelsup 0 :varnosyn 1 :varattnosyn 1 :location 65} {VAR :varno 2 :varattno 1 :vartype 23 :vartypmod -1 :varcollid 0 :varlevelsup 0 :varnosyn 2 :varattnosyn 1 :location 65}) :sortgrouprefs  1 2 :cost.startup 0.00 :cost.per_tuple 0.00 :width 8 :has_volatile_expr 0} :required_outer (b) :parallel_aware false :parallel_safe true :parallel_workers 0 :rows 6502500 :startup_cost 0.15 :total_cost 81409.53 :pathkeys ({PATHKEY :pk_eclass {EQUIVALENCECLASS :ec_opfamilies (o 1976) :ec_collation 0 :ec_members ({EQUIVALENCEMEMBER :em_expr {VAR :varno 1 :varattno 1 :vartype 23 :vartypmod -1 :varcollid 0 :varlevelsup 0 :varnosyn 1 :varattnosyn 1 :location 65} :em_relids (b 1) :em_nullable_relids (b) :em_is_const false :em_is_child false :em_datatype 23}) :ec_sources <> :ec_derives <> :ec_relids (b 1) :ec_has_const false :ec_has_volatile false :ec_below_outer_join false :ec_broken false :ec_sortref 1 :ec_min_security 4294967295 :ec_max_security 0} :pk_opfamily 1976 :pk_strategy 1 :pk_nulls_first false}) :jointype 0 :inner_unique false :outerjoinpath {INDEXPATH :pathtype 23 :parent_relids (b 1) :required_outer (b) :parallel_aware false :parallel_safe true :parallel_workers 0 :rows 2550 :startup_cost 0.15 :total_cost 86.41 :pathkeys ({PATHKEY :pk_eclass {EQUIVALENCECLASS :ec_opfamilies (o 1976) :ec_collation 0 :ec_members ({EQUIVALENCEMEMBER :em_expr {VAR :varno 1 :varattno 1 :vartype 23 :vartypmod -1 :varcollid 0 :varlevelsup 0 :varnosyn 1 :varattnosyn 1 :location 65} :em_relids (b 1) :em_nullable_relids (b) :em_is_const false :em_is_child false :em_datatype 23}) :ec_sources <> :ec_derives <> :ec_relids (b 1) :ec_has_const false :ec_has_volatile false :ec_below_outer_join false :ec_broken false :ec_sortref 1 :ec_min_security 4294967295 :ec_max_security 0} :pk_opfamily 1976 :pk_strategy 1 :pk_nulls_first false}) :indexinfo {INDEXOPTINFO :indexoid 387542 :pages 2 :tuples 2550 :tree_height 0 :ncolumns 1 :relam 403 :indpred <> :indextlist ({TARGETENTRY :expr {VAR :varno 1 :varattno 1 :vartype 23 :vartypmod -1 :varcollid 0 :varlevelsup 0 :varnosyn 1 :varattnosyn 1 :location -1} :resno 1 :resname <> :ressortgroupref 0 :resorigtbl 0 :resorigcol 0 :resjunk false}) :indrestrictinfo <> :predOK false :unique true :immediate true :hypothetical false} :indexclauses <> :indexorderbys <> :indexorderbycols <> :indexscandir 1 :indextotalcost 20.91 :indexselectivity 1.0000} :innerjoinpath {MATERIALPATH :pathtype 41 :parent_relids (b 2) :required_outer (b) :parallel_aware false :parallel_safe true :parallel_workers 0 :rows 2550 :startup_cost 0.00 :total_cost 48.25 :pathkeys <> :subpath {PATH :pathtype 20 :parent_relids (b 2) :required_outer (b) :parallel_aware false :parallel_safe true :parallel_workers 0 :rows 2550 :startup_cost 0.00 :total_cost 35.50 :pathkeys <>}} :joinrestrictinfo <>} :nPresortedCols 1}
+    ```
+
+
+
+
+
+*   ***(13)*** ***GPU Error Bug #13***
+
+    ***URL:*** <https://github.com/heterodb/pg-strom/issues/644#issue-1898645010>
+
+    ***Brief Description:*** *SELECT \* FROM \<table> RIGHT OUTER JOIN \<table> ON (\<column>::INT) IS NULL*  brings error, when pg\_strom.enabled is turned on.
+
+    ***Status:*** Fixed
+
+    ***Test Case:***
+
+    ```sql
+    CREATE TABLE t0(c0 DECIMAL) ;
+    CREATE TABLE t1(LIKE t0);
+    INSERT INTO t0(c0) VALUES(NULL);
+    INSERT INTO t1(c0) VALUES(NULL);
+    CREATE SCHEMA extensions;
+    CREATE EXTENSION pg_strom WITH SCHEMA extensions;
+
+    -- SQL executes on the CPU:
+    set pg_strom.enabled=off;
+    SELECT * FROM t0 RIGHT OUTER JOIN t1 ON ((t1.c0)::INT) IS NULL;
+    -- Result:
+     c0 | c0 
+    ----+----
+        |   
+    (1 row)
+
+    -- SQL executes on the GPU: 
+    set pg_strom.enabled=on;
+    SELECT * FROM t0 RIGHT OUTER JOIN t1 ON ((t1.c0)::INT) IS NULL;
+    -- Result:
+    ERROR:  gpu_service.c:1600  failed on cuEventSynchronize: CUDA_ERROR_ASSERT
+    HINT:  device at GPU-0, function at gpuservHandleGpuTaskExec
+    ```
+
+
+
+<!---->
+
+*   ***(14)*** ***GPU Error Bug #14***
+
+    ***URL:*** <https://github.com/heterodb/pg-strom/issues/645#issue-1898661873>
+
+    ***Brief Description:*** *SELECT ((\<column> BETWEEN SYMMETRIC \<integer> AND \<integer>)OR((\<decimal>::MONEY) IN (CAST(\<decimal> AS MONEY), CAST(\<decimal> AS MONEY)))) FROM \<table> WHERE (\<column>) BETWEEN SYMMETRIC (\<integer>) AND (\<column>)*  brings error, when pg\_strom.enabled is turned on.
+
+    ***Status:*** Fixed
+
+    ***Test Case:***
+
+    ```sql
+    CREATE TEMP TABLE IF NOT EXISTS t1(c0 int);
+    CREATE TABLE IF NOT EXISTS t3(LIKE t1);
+    INSERT INTO t1(c0) VALUES(1);
+    INSERT INTO t3(c0) VALUES(1);
+    CREATE SCHEMA extensions;
+    CREATE EXTENSION pg_strom WITH SCHEMA extensions;
+
+    -- SQL executes on the CPU:
+    set pg_strom.enabled=off;
+    SELECT (((t1.c0) BETWEEN SYMMETRIC 0 AND 1)OR(((0.1)::MONEY) IN (CAST(0.1 AS MONEY), CAST(0.0 AS MONEY)))) FROM t1, t3 WHERE (t1.c0) BETWEEN SYMMETRIC (0) AND (t3.c0);
+    -- Result:
+     ?column? 
+    ----------
+     t
+    (1 row)
+
+    -- SQL executes on the GPU: 
+    set pg_strom.enabled=on;
+    SELECT (((t1.c0) BETWEEN SYMMETRIC 0 AND 1)OR(((0.1)::MONEY) IN (CAST(0.1 AS MONEY), CAST(0.0 AS MONEY)))) FROM t1, t3 WHERE (t1.c0) BETWEEN SYMMETRIC (0) AND (t3.c0);
+    -- Result:
+    ERROR:  unrecognized node type: 231
+    ```
+
+
+
+
+
+*   ***(15)*** ***GPU Error Bug #15***
+
+    ***URL:*** <https://github.com/heterodb/pg-strom/issues/646#issue-1898664146>
+
+    ***Brief Description:*** *SELECT ('\<interval>'::int4range), \<column>::INT FROM \<table> WHERE (\<column>!=\<column>)*  brings error, when pg\_strom.enabled is turned on.
+
+    ***Status:*** Fixed
+
+    ***Test Case:***
+
+    ```sql
+    CREATE TABLE t1(c0 CHAR, c1 DECIMAL);
+    CREATE TABLE t2(LIKE t1);
+    CREATE TABLE t3(LIKE t1);
+    INSERT INTO t3(c0, c1) VALUES(B'1', 0.5);
+    INSERT INTO t2(c0, c1) VALUES(B'1', 0.7);
+    INSERT INTO t1(c0) VALUES(B'1');
+    SET SESSION enable_sort=DEFAULT;
+    CREATE SCHEMA extensions;
+    CREATE EXTENSION pg_strom WITH SCHEMA extensions;
+
+    -- SQL executes on the CPU:
+    set pg_strom.enabled=off;
+    SELECT ('[0,1)'::int4range), (t1.c1)::INT FROM t1, t2, t3 WHERE ((t3.c1)!=(t2.c1));
+    -- Result:
+     int4range | c1 
+    -----------+----
+     [0,1)     | 
+    (1 row)
+
+    -- SQL executes on the GPU: 
+    set pg_strom.enabled=on;
+    SELECT ('[0,1)'::int4range), (t1.c1)::INT FROM t1, t2, t3 WHERE ((t3.c1)!=(t2.c1));
+    -- Result:
+    ERROR:  gpu_service.c:1823  failed on cuEventSynchronize: CUDA_ERROR_ASSERT
+    HINT:  device at GPU-0, function at gpuservHandleGpuTaskExec
+    ```
+
+
+
+
+
+*   ***(16)*** ***GPU Error Bug #16***
+
+    ***URL:*** <https://github.com/heterodb/pg-strom/issues/679#issue-2003677874>
+
+    ***Brief Description:***  *SELECT \<column> FROM \<table> RIGHT OUTER JOIN (SELECT \<column> FROM \<tables> ORDER BY \<column> DESC, \<column> DESC) AS sub0 ON FALSE*  brings error, when pg\_strom.enabled is turned on.
+
+    ***Status:*** Fixed
+
+    ***Test Case:***
+
+    ```sql
+    CREATE TABLE t0(c0 serial CHECK(true) NO INHERIT UNIQUE PRIMARY KEY) ;
+    CREATE TABLE t1(LIKE t0);
+    INSERT INTO t0(c0) VALUES(1);
+    INSERT INTO t1(c0) VALUES(1);
+    CREATE SCHEMA extensions;
+    CREATE EXTENSION pg_strom WITH SCHEMA extensions;
+
+    -- SQL executes on the CPU:
+    SET pg_strom.enabled=off;
+    SELECT * FROM t0 RIGHT OUTER JOIN (SELECT * FROM t1, t0 ORDER BY t0.c0 DESC, t1.c0 DESC) AS sub0 ON FALSE;
+    -- Result:
+     c0 | c0 | c0 
+    ----+----+----
+        |  1 |  1
+    (1 row)
+
+    -- SQL executes on the GPU: 
+    SET pg_strom.enabled=on;
+    SELECT * FROM t0 RIGHT OUTER JOIN (SELECT * FROM t1, t0 ORDER BY t0.c0 DESC, t1.c0 DESC) AS sub0 ON FALSE;
+    -- Result:
+    ERROR:  Bug? unknown path-node: {INCREMENTALSORTPATH :pathtype 44 :parent_relids (b) :pathtarget {PATHTARGET :exprs ({VAR :varno 1 :varattno 1 :vartype 23 :vartypmod -1 :varcollid 0 :varlevelsup 0 :varnosyn 1 :varattnosyn 1 :location 42} {VAR :varno 2 :varattno 1 :vartype 23 :vartypmod -1 :varcollid 0 :varlevelsup 0 :varnosyn 2 :varattnosyn 1 :location 42}) :sortgrouprefs  2 1 :cost.startup 0.00 :cost.per_tuple 0.00 :width 8 :has_volatile_expr 0} :required_outer (b) :parallel_aware false :parallel_safe true :parallel_workers 0 :rows 6502500 :startup_cost 259.69 :total_cost 751278.70 :pathkeys ({PATHKEY :pk_eclass {EQUIVALENCECLASS :ec_opfamilies (o 1976) :ec_collation 0 :ec_members ({EQUIVALENCEMEMBER :em_expr {VAR :varno 2 :varattno 1 :vartype 23 :vartypmod -1 :varcollid 0 :varlevelsup 0 :varnosyn 2 :varattnosyn 1 :location 42} :em_relids (b 2) :em_nullable_relids (b) :em_is_const false :em_is_child false :em_datatype 23}) :ec_sources <> :ec_derives <> :ec_relids (b 2) :ec_has_const false :ec_has_volatile false :ec_below_outer_join false :ec_broken false :ec_sortref 1 :ec_min_security 4294967295 :ec_max_security 0} :pk_opfamily 1976 :pk_strategy 5 :pk_nulls_first true} {PATHKEY :pk_eclass {EQUIVALENCECLASS :ec_opfamilies (o 1976) :ec_collation 0 :ec_members ({EQUIVALENCEMEMBER :em_expr {VAR :varno 1 :varattno 1 :vartype 23 :vartypmod -1 :varcollid 0 :varlevelsup 0 :varnosyn 1 :varattnosyn 1 :location 42} :em_relids (b 1) :em_nullable_relids (b) :em_is_const false :em_is_child false :em_datatype 23}) :ec_sources <> :ec_derives <> :ec_relids (b 1) :ec_has_const false :ec_has_volatile false :ec_below_outer_join false :ec_broken false :ec_sortref 2 :ec_min_security 4294967295 :ec_max_security 0} :pk_opfamily 1976 :pk_strategy 5 :pk_nulls_first true}) :subpath {NESTPATH :pathtype 38 :parent_relids (b 1 2) :pathtarget {PATHTARGET :exprs ({VAR :varno 1 :varattno 1 :vartype 23 :vartypmod -1 :varcollid 0 :varlevelsup 0 :varnosyn 1 :varattnosyn 1 :location 42} {VAR :varno 2 :varattno 1 :vartype 23 :vartypmod -1 :varcollid 0 :varlevelsup 0 :varnosyn 2 :varattnosyn 1 :location 42}) :sortgrouprefs  2 1 :cost.startup 0.00 :cost.per_tuple 0.00 :width 8 :has_volatile_expr 0} :required_outer (b) :parallel_aware false :parallel_safe true :parallel_workers 0 :rows 6502500 :startup_cost 0.15 :total_cost 81409.53 :pathkeys ({PATHKEY :pk_eclass {EQUIVALENCECLASS :ec_opfamilies (o 1976) :ec_collation 0 :ec_members ({EQUIVALENCEMEMBER :em_expr {VAR :varno 2 :varattno 1 :vartype 23 :vartypmod -1 :varcollid 0 :varlevelsup 0 :varnosyn 2 :varattnosyn 1 :location 42} :em_relids (b 2) :em_nullable_relids (b) :em_is_const false :em_is_child false :em_datatype 23}) :ec_sources <> :ec_derives <> :ec_relids (b 2) :ec_has_const false :ec_has_volatile false :ec_below_outer_join false :ec_broken false :ec_sortref 1 :ec_min_security 4294967295 :ec_max_security 0} :pk_opfamily 1976 :pk_strategy 5 :pk_nulls_first true}) :jointype 0 :inner_unique false :outerjoinpath {INDEXPATH :pathtype 23 :parent_relids (b 2) :required_outer (b) :parallel_aware false :parallel_safe true :parallel_workers 0 :rows 2550 :startup_cost 0.15 :total_cost 86.41 :pathkeys ({PATHKEY :pk_eclass {EQUIVALENCECLASS :ec_opfamilies (o 1976) :ec_collation 0 :ec_members ({EQUIVALENCEMEMBER :em_expr {VAR :varno 2 :varattno 1 :vartype 23 :vartypmod -1 :varcollid 0 :varlevelsup 0 :varnosyn 2 :varattnosyn 1 :location 42} :em_relids (b 2) :em_nullable_relids (b) :em_is_const false :em_is_child false :em_datatype 23}) :ec_sources <> :ec_derives <> :ec_relids (b 2) :ec_has_const false :ec_has_volatile false :ec_below_outer_join false :ec_broken false :ec_sortref 1 :ec_min_security 4294967295 :ec_max_security 0} :pk_opfamily 1976 :pk_strategy 5 :pk_nulls_first true}) :indexinfo {INDEXOPTINFO :indexoid 51078 :pages 2 :tuples 2550 :tree_height 0 :ncolumns 1 :relam 403 :indpred <> :indextlist ({TARGETENTRY :expr {VAR :varno 2 :varattno 1 :vartype 23 :vartypmod -1 :varcollid 0 :varlevelsup 0 :varnosyn 2 :varattnosyn 1 :location -1} :resno 1 :resname <> :ressortgroupref 0 :resorigtbl 0 :resorigcol 0 :resjunk false}) :indrestrictinfo <> :predOK false :unique true :immediate true :hypothetical false} :indexclauses <> :indexorderbys <> :indexorderbycols <> :indexscandir -1 :indextotalcost 20.91 :indexselectivity 1.0000} :innerjoinpath {MATERIALPATH :pathtype 41 :parent_relids (b 1) :required_outer (b) :parallel_aware false :parallel_safe true :parallel_workers 0 :rows 2550 :startup_cost 0.00 :total_cost 48.25 :pathkeys <> :subpath {PATH :pathtype 20 :parent_relids (b 1) :required_outer (b) :parallel_aware false :parallel_safe true :parallel_workers 0 :rows 2550 :startup_cost 0.00 :total_cost 35.50 :pathkeys <>}} :joinrestrictinfo <>} :nPresortedCols 1}
+    ```
+
+
+
+
+
+*   ***(17)*** ***GPU Error Bug #17***
+
+    ***URL:*** <https://github.com/heterodb/pg-strom/issues/683#issue-2008473011>
+
+    ***Brief Description:***  *SELECT DISTINCT ON (\<column> + 1) \<column> FROM \<table> FULL OUTER JOIN \<table> ON (\<column>) IN (\<column>)*  brings error, when pg\_strom.enabled is turned on.
+
+    ***Status:*** Fixed
+
+    ***Test Case:***
+
+    ```sql
+    CREATE TABLE t2(c0 bigint);
+    CREATE TABLE t3(LIKE t2);
+    INSERT INTO t3(c0) VALUES(33092);
+    CREATE SCHEMA extensions;
+    CREATE EXTENSION pg_strom WITH SCHEMA extensions;
+
+    -- SQL executes on the CPU:
+    set pg_strom.enabled=off;
+    SELECT DISTINCT ON (t3.c0 + 1) t3.c0 FROM t3 FULL OUTER JOIN t2 ON (t2.c0) IN (t3.c0);
+    -- Result:
+      c0   
+    -------
+     33092
+    (1 row)
+
+    -- SQL executes on the GPU: 
+    set pg_strom.enabled=on;
+    SELECT DISTINCT ON (t3.c0 + 1) t3.c0 FROM t3 FULL OUTER JOIN t2 ON (t2.c0) IN (t3.c0);
+    -- Result:
+    ERROR:  xpu_basetype.cu:533  int84pl: value out of range
+    HINT:  device at GPU-0, function at pgfn_int84pl
+    ```
+
+
+
+#### #3 Logic Bug
+
+*   ***(1)*** ***GPU Logic Bug #1***
+
+    ***URL:*** <https://github.com/heterodb/pg-strom/issues/628>
+
+    ***Brief Description:***   *SELECT \<column> FROM JOIN tables ON (CAST(\<decimal> AS MONEY))* * *brings different results, when turn on and off pg\_strom.enabled.
+
+    ***Status:*** Fixed
+
+    ***Test Case:***
+
+    ```sql
+    CREATE TABLE t1(c0 INT);
+    CREATE TABLE t2(LIKE t1);
+    INSERT INTO t2(c0) VALUES(1);
+    INSERT INTO t1(c0) VALUES(1);
+    CREATE SCHEMA extensions;
+    CREATE EXTENSION pg_strom WITH SCHEMA extensions;
+
+    -- SQL executes on the CPU:
+    set pg_strom.enabled=off;
+    SELECT t1.c0 FROM t1 RIGHT OUTER JOIN t2 ON ((CAST(0.1 AS MONEY)) NOT IN (CAST(0.1 AS MONEY)));
+    -- Result:
+     c0 
+    ----
+       
+    (1 row)
+
+    -- SQL executes on the GPU: 
+    set pg_strom.enabled=on;
+    SELECT t1.c0 FROM t1 RIGHT OUTER JOIN t2 ON ((CAST(0.1 AS MONEY)) NOT IN (CAST(0.1 AS MONEY)));
+    -- Result:
+     c0 
+    ----
+    (0 rows)
+    ```
+
+
+
+*   ***(2)*** ***GPU Logic Bug #2***
+
+    ***URL:*** <https://github.com/heterodb/pg-strom/issues/630>
+
+    ***Brief Description:***  *SELECT \<column> FROM table LEFT OUTER JOIN table ON (\<column> IS DISTINCT FROM(CAST(1.0E1 AS MONEY))) WHERE (\<column>) IS NULL*  brings different results, when turn on and off pg\_strom.enabled.
+
+    ***Status:*** Fixed
+
+    ***Test Case:***
+
+    ```sql
+    CREATE TABLE t0(c0 money , c1 boolean);
+    CREATE TABLE t1(LIKE t0);
+    INSERT INTO t0(c0, c1) VALUES((1)::MONEY, TRUE);
+    INSERT INTO t1(c0, c1) VALUES((1)::MONEY, TRUE);
+    CREATE SCHEMA extensions;
+    CREATE EXTENSION pg_strom WITH SCHEMA extensions;
+
+    -- SQL executes on the CPU:
+    set pg_strom.enabled=off;
+    SELECT SUM(t1.c0) FROM t1 LEFT OUTER JOIN t0 ON ((t0.c0)IS DISTINCT FROM(CAST(1.0E1 AS MONEY))) WHERE (t0.c1) IS NULL;
+    -- Result:
+     sum 
+    -----
+        
+    (1 row)
+
+    -- SQL executes on the GPU: 
+    set pg_strom.enabled=on;
+    SELECT SUM(t1.c0) FROM t1 LEFT OUTER JOIN t0 ON ((t0.c0)IS DISTINCT FROM(CAST(1.0E1 AS MONEY))) WHERE (t0.c1) IS NULL;
+    -- Result:
+      sum  
+    -------
+     $1.00
+    (1 row)
+    ```
+
+
+
+*   ***(3)*** ***GPU Logic Bug #3***
+
+    ***URL:*** <https://github.com/heterodb/pg-strom/issues/639#issue-1879174443>
+
+    ***Brief Description:***  *SELECT MIN(\<column>) FROM table LEFT OUTER JOIN (SELECT \<column> FROM table) AS sub0 ON (\<column> > 0) GROUP BY (\<column>) HAVING TRUE*  brings different results, when turn on and off pg\_strom.enabled.
+
+    ***Status:*** Fixed
+
+    ***Test Case:***
+
+    ```sql
+    CREATE TABLE t1(c0 int);
+    CREATE TABLE t2(LIKE t1);
+    INSERT INTO t1(c0) VALUES(1);
+    INSERT INTO t2(c0) VALUES(1);
+    CREATE SCHEMA extensions;
+    CREATE EXTENSION pg_strom WITH SCHEMA extensions;
+
+    -- SQL executes on the CPU:
+    set pg_strom.enabled=off;
+    SELECT MIN(t2.c0)
+    FROM t2
+    LEFT OUTER JOIN
+        (SELECT c0 FROM t1) AS sub0 
+            ON t2.c0 > 0 
+    GROUP BY (t2.c0)
+    HAVING TRUE;
+    -- Result:
+     min 
+    -----
+       1
+    (1 row)
+
+    -- SQL executes on the GPU: 
+    set pg_strom.enabled=on;
+    SELECT MIN(t2.c0)
+    FROM t2
+    LEFT OUTER JOIN
+        (SELECT c0 FROM t1) AS sub0 
+            ON t2.c0 > 0 
+    GROUP BY (t2.c0)
+    HAVING TRUE;
+    -- Result:
+     min |   
+    -----+---
+       1 | 1
+    (1 row)
+    ```
+
+
+
+*   ***(4)*** ***GPU Logic Bug #4***
+
+    ***URL:*** <https://github.com/heterodb/pg-strom/issues/638#issue-1879174130>
+
+    ***Brief Description:*** *SELECT MIN(1) FROM table GROUP BY \<column> HAVING NOT (MIN(1))::BOOLEAN*   brings different results, when turn on and off pg\_strom.enabled.
+
+    ***Status:*** Fixed
+
+    ***Test Case:***
+
+    ```sql
+    CREATE TABLE t1(c0 int) USING heap;
+    SET enable_seqscan=0;
+    INSERT INTO t1(c0) VALUES(1);
+    CREATE SCHEMA extensions;
+    CREATE EXTENSION pg_strom WITH SCHEMA extensions;
+
+    -- SQL executes on the CPU:
+    set pg_strom.enabled=off;
+    SELECT MIN(1) FROM t1 GROUP BY t1.c0 HAVING NOT (MIN(1))::BOOLEAN;
+    -- Result:
+     min 
+    -----
+    (0 rows)
+
+    -- SQL executes on the GPU: 
+    set pg_strom.enabled=on;
+    SELECT MIN(1) FROM t1 GROUP BY t1.c0 HAVING NOT (MIN(1))::BOOLEAN;
+    -- Result:
+     min |  
+    -----+--
+    (0 rows)
+    ```
+
+
+
+*   ***(5)*** ***GPU Logic Bug #5***
+
+    ***URL:*** <https://github.com/heterodb/pg-strom/issues/647#issue-1898665984>
+
+    ***Brief Description:***  *SELECT \* FROM \<table> WHERE (\<column> IS NOT DISTINCT FROM \<column>) IS TRUE*  brings different results, when turn on and off pg\_strom.enabled.
+
+    ***Status:*** Fixed
+
+    ***Test Case:***
+
+    ```sql
+    CREATE TABLE t0(c0 int , c1 int);
+    CREATE TABLE t1(LIKE t0);
+    INSERT INTO t0(c0, c1) VALUES(1, 0), (1, 0);
+    INSERT INTO t1(c0, c1) VALUES(1, 0);
+    CREATE SCHEMA extensions;
+    CREATE EXTENSION pg_strom WITH SCHEMA extensions;
+
+    -- SQL executes on the CPU:
+    set pg_strom.enabled=off;
+    SELECT * FROM t1, t0 WHERE ((t1.c1) IS NOT DISTINCT FROM (t0.c1)) IS TRUE;
+    -- Result:
+     c0 | c1 | c0 | c1 
+    ----+----+----+----
+      1 |  0 |  1 |  0
+      1 |  0 |  1 |  0
+    (2 rows)
+
+    -- SQL executes on the GPU: 
+    set pg_strom.enabled=on;
+    SELECT * FROM t1, t0 WHERE ((t1.c1) IS NOT DISTINCT FROM (t0.c1)) IS TRUE;
+    -- Result:
+     c0 | c1 | c0 | c1 
+    ----+----+----+----
+      1 |  0 |  1 |  0
+    (1 row)
+    ```
+
+
+
+*   ***(6)*** ***GPU Logic Bug #6***
+
+    ***URL:*** <https://github.com/heterodb/pg-strom/issues/648#issue-1898667238>
+
+    ***Brief Description:***  *SELECT \<column> FROM \<table> WHERE \<column> BETWEEN SYMMETRIC \<column> AND (\<decimal>::MONEY)*   brings different results, when turn on and off pg\_strom.enabled.
+
+    ***Status:*** Fixed
+
+    ***Test Case:***
+
+    ```sql
+    CREATE TABLE t1(c0 money , c1 int4range);
+    CREATE TABLE t2(LIKE t1);
+    INSERT INTO t1(c0, c1) VALUES(CAST(0.5 AS MONEY), ('[0,1]'::int4range));
+    INSERT INTO t2(c1, c0) VALUES('[0,1]'::int4range, (0.7)::MONEY);
+    CREATE SCHEMA extensions;
+    CREATE EXTENSION pg_strom WITH SCHEMA extensions;
+
+    -- SQL executes on the CPU:
+    set pg_strom.enabled=off;
+    SELECT t1.c0 FROM t2, t1 WHERE (t2.c0) BETWEEN SYMMETRIC (t1.c0) AND ((0.9)::MONEY);
+    -- Result:
+
+      c0   
+    -------
+     $0.50
+    (1 row)
+
+    -- SQL executes on the GPU: 
+    set pg_strom.enabled=on;
+    SELECT t1.c0 FROM t2, t1 WHERE (t2.c0) BETWEEN SYMMETRIC (t1.c0) AND ((0.9)::MONEY);
+    -- Result:
+     c0 
+    ----
+    (0 rows)
+    ```
+
+
+
+*   ***(7)*** ***GPU Logic Bug #7***
+
+    ***URL: ***<https://github.com/heterodb/pg-strom/issues/650>
+
+    ***Brief Description:***  *SELECT \* FROM \<table> WHERE ( (\<column> is null )::INT IS NOT DISTINCT FROM \<column>) OR \<column>*  brings different results, when turn on and off pg\_strom.enabled.
+
+    ***Status:*** Fixed
+
+    ***Test Case:***
+
+    ```sql
+    CREATE TABLE t0(c0 REAL);
+    CREATE TABLE t1(c0 boolean);
+    INSERT INTO t1(c0) VALUES(null);
+    INSERT INTO t0(c0) VALUES(0.1);
+    CREATE SCHEMA extensions;
+    CREATE EXTENSION pg_strom WITH SCHEMA extensions;
+
+    -- SQL executes on the CPU:
+    set pg_strom.enabled=off;
+    SELECT * FROM t0,t1 WHERE ((t0.c0)::INT IS NOT DISTINCT FROM (t0.c0)) OR (t1.c0);
+    -- Result:
+     c0 | c0 
+    ----+----
+    (0 rows)
+
+    -- SQL executes on the GPU: 
+    set pg_strom.enabled=on;
+    SELECT * FROM t0,t1 WHERE ((t0.c0)::INT IS NOT DISTINCT FROM (t0.c0)) OR (t1.c0);
+    -- Result:
+     c0  | c0 
+    -----+----
+     0.1 | 
+    (1 row)
+    ```
+
+
+\* In order to better locate bugs by developers, some of PG-Strom version in the issue report is newer than Commit 9765660. And all of these bugs can also be reproduced at Commit 9765660.
+
 
 ### **2. HeavyDB**
 
