@@ -1014,7 +1014,7 @@
 
 *   ***(7)*** ***GPU Logic Bug #7***
 
-    ***URL: ***<https://github.com/heterodb/pg-strom/issues/650>
+    ***URL:***  <https://github.com/heterodb/pg-strom/issues/650>
 
     ***Brief Description:***  *SELECT \* FROM \<table> WHERE ( (\<column> is null )::INT IS NOT DISTINCT FROM \<column>) OR \<column>*  brings different results, when turn on and off pg\_strom.enabled.
 
@@ -1491,7 +1491,7 @@
 
 *   ***(3)*** ***GPU Logic Bug #3***
 
-    ***URL:***&#x20;
+    ***URL:*** <https://github.com/heavyai/heavydb/issues/813#issue-1948709721>
 
     ***Brief Description:*** *SELECT DISTINCT \<column> FROM \<table> WHERE  CAST(\<column> AS INT) != 1*  brings different results , when set EXECUTOR\_DEVICE 'CPU' and 'GPU'.
 
@@ -2446,7 +2446,7 @@
 
     ***URL:***<https://github.com/dask-contrib/dask-sql/issues/1277#issue-2015426552>
 
-    ***Brief Description: **SELECT (((\<column> LIKE '\뽞^' ESCAPE 'M')) IS NULL) FROM \<tables>* brings errors,  when using 'GPU'.
+    ***Brief Description:*** SELECT (((\<column> LIKE '\뽞^' ESCAPE 'M')) IS NULL) FROM \<tables>* brings errors,  when using 'GPU'.
 
     ***Status:*** None
 
@@ -2537,7 +2537,7 @@
 
 #### #3 Logic Bug
 
-*   ***(1)*** ***GPU Error Bug #1***
+*   ***(1)*** ***GPU Logic Bug #1***
 
     ***URL:*** <https://github.com/dask-contrib/dask-sql/issues/1226#issue-1903129160>
 
@@ -2582,7 +2582,7 @@
 
 
 
-*   ***(2)*** ***GPU Error Bug #2***
+*   ***(2)*** ***GPU Logic Bug #2***
 
     ***URL:*** <https://github.com/dask-contrib/dask-sql/issues/1236#issue-1905145952>
 
@@ -2629,7 +2629,7 @@
 
 
 
-*   ***(3)*** ***GPU Error Bug #3***
+*   ***(3)*** ***GPU Logic Bug #3***
 
     ***URL:*** <https://github.com/dask-contrib/dask-sql/issues/1235#issue-1905046307>
 
@@ -2677,7 +2677,7 @@
 
 <!---->
 
-*   ***(4)*** ***GPU Error Bug #4***
+*   ***(4)*** ***GPU Logic Bug #4***
 
     ***URL:*** <https://github.com/dask-contrib/dask-sql/issues/1234#issue-1905003214>
 
@@ -2724,7 +2724,7 @@
 
 <!---->
 
-*   ***(5)*** ***GPU Error Bug #5***
+*   ***(5)*** ***GPU Logic Bug #5***
 
     ***URL:*** <https://github.com/dask-contrib/dask-sql/issues/1233#issue-1904946380>
 
