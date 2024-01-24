@@ -452,14 +452,13 @@
     ----+----
         | 
     (1 row)
-    ```
 
     -- SQL executes on the GPU: 
     set pg_strom.enabled=on;
     SELECT t1.c1, t0.c2 FROM t1 FULL OUTER JOIN t0 ON (t0.c2) IN (t1.c2) WHERE ((t0.c0) IN ((0.1)::MONEY)) ISNULL;
     -- Result:
     ERROR:  could not format inet value: Address family not supported by protocol
-
+    ```
 
 
 *   ***(10)*** ***GPU Error Bug #10***
