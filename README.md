@@ -43,7 +43,7 @@
     CREATE SCHEMA extensions;
     CREATE EXTENSION pg_strom WITH SCHEMA extensions;
 
-    -- SQL executes on the CPU: 
+    -- SQL is executed on the CPU: 
     set pg_strom.enabled=off;
     SELECT * FROM
             (SELECT c2 AS f1,
@@ -58,7 +58,7 @@
     -----+-----
     (0 rows)
 
-    -- SQL executes on the GPU: 
+    -- SQL is executed on the GPU: 
     set pg_strom.enabled=on;
     SELECT * FROM
             (SELECT c2 AS f1,
@@ -94,7 +94,7 @@
     CREATE SCHEMA extensions;
     CREATE EXTENSION pg_strom WITH SCHEMA extensions;
 
-    -- SQL executes on the CPU: 
+    -- SQL is executed on the CPU: 
     set pg_strom.enabled=off;
     SELECT MIN(t2.c0)
     FROM t2
@@ -109,7 +109,7 @@
        1
     (1 row)
 
-    -- SQL executes on the GPU: 
+    -- SQL is executed on the GPU: 
     set pg_strom.enabled=on;
     SELECT MIN(t2.c0)
     FROM t2
@@ -146,7 +146,7 @@
     CREATE SCHEMA extensions;
     CREATE EXTENSION pg_strom WITH SCHEMA extensions;
 
-    -- SQL executes on the CPU: 
+    -- SQL is executed on the CPU: 
     set pg_strom.enabled=off;
     SELECT t2.c0 FROM t1 RIGHT OUTER JOIN t2 ON ((CAST(0.1 AS MONEY)) IN (CAST(0.1 AS MONEY)));
     -- Result:
@@ -155,7 +155,7 @@
       1
     (1 row)
 
-    -- SQL executes on the GPU: 
+    -- SQL is executed on the GPU: 
     set pg_strom.enabled=on;
     SELECT t2.c0 FROM t1 RIGHT OUTER JOIN t2 ON ((CAST(0.1 AS MONEY)) IN (CAST(0.1 AS MONEY)));
     -- Result:
@@ -183,7 +183,7 @@
     CREATE SCHEMA extensions;
     CREATE EXTENSION pg_strom WITH SCHEMA extensions;
 
-    -- SQL executes on the CPU: 
+    -- SQL is executed on the CPU: 
     set pg_strom.enabled=off;
     SELECT t2 FROM t1 RIGHT OUTER JOIN t2 ON ((CAST(0.1 AS MONEY)) IN (CAST(0.1 AS MONEY)));
     -- Result:
@@ -192,7 +192,7 @@
      (1)
     (1 row)
 
-    -- SQL executes on the GPU: 
+    -- SQL is executed on the GPU: 
     set pg_strom.enabled=on;
     SELECT t2 FROM t1 RIGHT OUTER JOIN t2 ON ((CAST(0.1 AS MONEY)) IN (CAST(0.1 AS MONEY)));
     -- Result:
@@ -219,7 +219,7 @@
     CREATE SCHEMA extensions;
     CREATE EXTENSION pg_strom WITH SCHEMA extensions;
 
-    -- SQL executes on the CPU: 
+    -- SQL is executed on the CPU: 
     set pg_strom.enabled=off;
     SELECT * FROM t1 LEFT OUTER JOIN t0 ON (t1.c0 = t1.c1);
     -- Result:
@@ -227,7 +227,7 @@
     ----+----+----
 
 
-    -- SQL executes on the GPU: 
+    -- SQL is executed on the GPU: 
     set pg_strom.enabled=on;
     SELECT * FROM t1 LEFT OUTER JOIN t0 ON (t1.c0 = t1.c1);
     -- Result:
@@ -252,7 +252,7 @@
     CREATE SCHEMA extensions;
     CREATE EXTENSION pg_strom WITH SCHEMA extensions;
 
-    -- SQL executes on the CPU: 
+    -- SQL is executed on the CPU: 
     set pg_strom.enabled=off;
     SELECT SUM(t1.c1) FROM t1;
     -- Result:
@@ -260,7 +260,7 @@
     -------
      $1.00
 
-    -- SQL executes on the GPU: 
+    -- SQL is executed on the GPU: 
     set pg_strom.enabled=on;
     SELECT SUM(t1.c1) FROM t1;
     -- Result:
@@ -295,7 +295,7 @@
     CREATE SCHEMA extensions;
     CREATE EXTENSION pg_strom WITH SCHEMA extensions;
 
-    -- SQL executes on the CPU: 
+    -- SQL is executed on the CPU: 
     set pg_strom.enabled=off;
     WITH MYWITH AS 
     SELECT 1 AS f1
@@ -308,7 +308,7 @@
     ----
     (0 rows)
 
-    -- SQL executes on the GPU: 
+    -- SQL is executed on the GPU: 
     set pg_strom.enabled=on;
     WITH MYWITH AS 
     SELECT 1 AS f1
@@ -339,7 +339,7 @@
     CREATE SCHEMA extensions;
     CREATE EXTENSION pg_strom WITH SCHEMA extensions;
 
-    -- SQL executes on the CPU:
+    -- SQL is executed on the CPU:
     SET pg_strom.enabled=off;
     SELECT AVG(0.1) FROM t0 GROUP BY t0.c0;
     -- Result:
@@ -348,7 +348,7 @@
      0.10000000000000000000
     (1 row)
 
-    -- SQL executes on the GPU: 
+    -- SQL is executed on the GPU: 
     SET pg_strom.enabled=on;
     SELECT AVG(0.1) FROM t0 GROUP BY t0.c0;
     -- Result:
@@ -373,7 +373,7 @@
     CREATE SCHEMA extensions;
     CREATE EXTENSION pg_strom WITH SCHEMA extensions;
 
-    -- SQL executes on the CPU:
+    -- SQL is executed on the CPU:
     set pg_strom.enabled=off;
     SELECT MIN(c0) FROM t0 GROUP BY t0.c0 HAVING CAST((MIN('1')) AS BOOLEAN);
     -- Result:
@@ -382,7 +382,7 @@
        1
     (1 row)
 
-    -- SQL executes on the GPU: 
+    -- SQL is executed on the GPU: 
     set pg_strom.enabled=on;
     SELECT MIN(c0) FROM t0 GROUP BY t0.c0 HAVING CAST((MIN('1')) AS BOOLEAN);
     -- Result:
@@ -407,7 +407,7 @@
     CREATE SCHEMA extensions;
     CREATE EXTENSION pg_strom WITH SCHEMA extensions;
 
-    -- SQL executes on the CPU:
+    -- SQL is executed on the CPU:
     set pg_strom.enabled=off;
     SELECT MAX(c0) FROM t0 GROUP BY t0.c1 HAVING t0.c0<MIN(t0.c0);
     -- Result:
@@ -415,7 +415,7 @@
     -----
     (0 rows)
 
-    -- SQL executes on the GPU: 
+    -- SQL is executed on the GPU: 
     set pg_strom.enabled=on;
     SELECT MAX(c0) FROM t0 GROUP BY t0.c1 HAVING t0.c0<MIN(t0.c0);
     -- Result:
@@ -444,7 +444,7 @@
     CREATE SCHEMA extensions;
     CREATE EXTENSION pg_strom WITH SCHEMA extensions;
 
-    -- SQL executes on the CPU:
+    -- SQL is executed on the CPU:
     set pg_strom.enabled=off;
     SELECT t1.c1, t0.c2 FROM t1 FULL OUTER JOIN t0 ON (t0.c2) IN (t1.c2) WHERE ((t0.c0) IN ((0.1)::MONEY)) ISNULL;
     -- Result:
@@ -453,7 +453,7 @@
         | 
     (1 row)
 
-    -- SQL executes on the GPU: 
+    -- SQL is executed on the GPU: 
     set pg_strom.enabled=on;
     SELECT t1.c1, t0.c2 FROM t1 FULL OUTER JOIN t0 ON (t0.c2) IN (t1.c2) WHERE ((t0.c0) IN ((0.1)::MONEY)) ISNULL;
     -- Result:
@@ -478,7 +478,7 @@
     CREATE SCHEMA extensions;
     CREATE EXTENSION pg_strom WITH SCHEMA extensions;
 
-    -- SQL executes on the CPU:
+    -- SQL is executed on the CPU:
     set pg_strom.enabled=off;
     SELECT c0 FROM t1 GROUP BY t1.c0 HAVING NOT (MIN(65536))::BOOLEAN;
     -- Result:
@@ -486,7 +486,7 @@
     ----
     (0 rows)
 
-    -- SQL executes on the GPU: 
+    -- SQL is executed on the GPU: 
     set pg_strom.enabled=on;
     SELECT c0 FROM t1 GROUP BY t1.c0 HAVING NOT (MIN(65536))::BOOLEAN;
     -- Result:
@@ -514,7 +514,7 @@
     CREATE SCHEMA extensions;
     CREATE EXTENSION pg_strom WITH SCHEMA extensions;
 
-    -- SQL executes on the CPU:
+    -- SQL is executed on the CPU:
     set pg_strom.enabled=off;
     SELECT (length(t1.c2) IN (0.0, 1.0))::INT FROM t0 CROSS JOIN t1 WHERE length(t1.c2) IN (t0.c0);
     -- Result:
@@ -523,7 +523,7 @@
     (0 rows)
 
 
-    -- SQL executes on the GPU: 
+    -- SQL is executed on the GPU: 
     set pg_strom.enabled=on;
     SELECT (length(t1.c2) IN (0.0, 1.0))::INT FROM t0 CROSS JOIN t1 WHERE length(t1.c2) IN (t0.c0);
     -- Result:
@@ -553,7 +553,7 @@
     CREATE SCHEMA extensions;
     CREATE EXTENSION pg_strom WITH SCHEMA extensions;
 
-    -- SQL executes on the CPU:
+    -- SQL is executed on the CPU:
     set pg_strom.enabled=off;
     SELECT * FROM t0 LEFT OUTER JOIN t1 ON FALSE CROSS JOIN (SELECT * FROM t0, t1 WHERE TRUE ORDER BY t0.c0 ASC, t1.c0 DESC) AS sub;
     -- Result:
@@ -562,7 +562,7 @@
       1 |    |  1 |  1
     (1 row)
 
-    -- SQL executes on the GPU: 
+    -- SQL is executed on the GPU: 
     set pg_strom.enabled=on;
     SELECT * FROM t0 LEFT OUTER JOIN t1 ON FALSE CROSS JOIN (SELECT * FROM t0, t1 WHERE TRUE ORDER BY t0.c0 ASC, t1.c0 DESC) AS sub;
     -- Result:
@@ -591,7 +591,7 @@
     CREATE SCHEMA extensions;
     CREATE EXTENSION pg_strom WITH SCHEMA extensions;
 
-    -- SQL executes on the CPU:
+    -- SQL is executed on the CPU:
     set pg_strom.enabled=off;
     SELECT * FROM t0 RIGHT OUTER JOIN t1 ON ((t1.c0)::INT) IS NULL;
     -- Result:
@@ -600,7 +600,7 @@
         |   
     (1 row)
 
-    -- SQL executes on the GPU: 
+    -- SQL is executed on the GPU: 
     set pg_strom.enabled=on;
     SELECT * FROM t0 RIGHT OUTER JOIN t1 ON ((t1.c0)::INT) IS NULL;
     -- Result:
@@ -630,7 +630,7 @@
     CREATE SCHEMA extensions;
     CREATE EXTENSION pg_strom WITH SCHEMA extensions;
 
-    -- SQL executes on the CPU:
+    -- SQL is executed on the CPU:
     set pg_strom.enabled=off;
     SELECT (((t1.c0) BETWEEN SYMMETRIC 0 AND 1)OR(((0.1)::MONEY) IN (CAST(0.1 AS MONEY), CAST(0.0 AS MONEY)))) FROM t1, t3 WHERE (t1.c0) BETWEEN SYMMETRIC (0) AND (t3.c0);
     -- Result:
@@ -639,7 +639,7 @@
      t
     (1 row)
 
-    -- SQL executes on the GPU: 
+    -- SQL is executed on the GPU: 
     set pg_strom.enabled=on;
     SELECT (((t1.c0) BETWEEN SYMMETRIC 0 AND 1)OR(((0.1)::MONEY) IN (CAST(0.1 AS MONEY), CAST(0.0 AS MONEY)))) FROM t1, t3 WHERE (t1.c0) BETWEEN SYMMETRIC (0) AND (t3.c0);
     -- Result:
@@ -671,7 +671,7 @@
     CREATE SCHEMA extensions;
     CREATE EXTENSION pg_strom WITH SCHEMA extensions;
 
-    -- SQL executes on the CPU:
+    -- SQL is executed on the CPU:
     set pg_strom.enabled=off;
     SELECT ('[0,1)'::int4range), (t1.c1)::INT FROM t1, t2, t3 WHERE ((t3.c1)!=(t2.c1));
     -- Result:
@@ -680,7 +680,7 @@
      [0,1)     | 
     (1 row)
 
-    -- SQL executes on the GPU: 
+    -- SQL is executed on the GPU: 
     set pg_strom.enabled=on;
     SELECT ('[0,1)'::int4range), (t1.c1)::INT FROM t1, t2, t3 WHERE ((t3.c1)!=(t2.c1));
     -- Result:
@@ -710,7 +710,7 @@
     CREATE SCHEMA extensions;
     CREATE EXTENSION pg_strom WITH SCHEMA extensions;
 
-    -- SQL executes on the CPU:
+    -- SQL is executed on the CPU:
     SET pg_strom.enabled=off;
     SELECT * FROM t0 RIGHT OUTER JOIN (SELECT * FROM t1, t0 ORDER BY t0.c0 DESC, t1.c0 DESC) AS sub0 ON FALSE;
     -- Result:
@@ -719,7 +719,7 @@
         |  1 |  1
     (1 row)
 
-    -- SQL executes on the GPU: 
+    -- SQL is executed on the GPU: 
     SET pg_strom.enabled=on;
     SELECT * FROM t0 RIGHT OUTER JOIN (SELECT * FROM t1, t0 ORDER BY t0.c0 DESC, t1.c0 DESC) AS sub0 ON FALSE;
     -- Result:
@@ -747,7 +747,7 @@
     CREATE SCHEMA extensions;
     CREATE EXTENSION pg_strom WITH SCHEMA extensions;
 
-    -- SQL executes on the CPU:
+    -- SQL is executed on the CPU:
     set pg_strom.enabled=off;
     SELECT DISTINCT ON (t3.c0 + 1) t3.c0 FROM t3 FULL OUTER JOIN t2 ON (t2.c0) IN (t3.c0);
     -- Result:
@@ -756,7 +756,7 @@
      33092
     (1 row)
 
-    -- SQL executes on the GPU: 
+    -- SQL is executed on the GPU: 
     set pg_strom.enabled=on;
     SELECT DISTINCT ON (t3.c0 + 1) t3.c0 FROM t3 FULL OUTER JOIN t2 ON (t2.c0) IN (t3.c0);
     -- Result:
@@ -786,7 +786,7 @@
     CREATE SCHEMA extensions;
     CREATE EXTENSION pg_strom WITH SCHEMA extensions;
 
-    -- SQL executes on the CPU:
+    -- SQL is executed on the CPU:
     set pg_strom.enabled=off;
     SELECT t1.c0 FROM t1 RIGHT OUTER JOIN t2 ON ((CAST(0.1 AS MONEY)) NOT IN (CAST(0.1 AS MONEY)));
     -- Result:
@@ -795,7 +795,7 @@
        
     (1 row)
 
-    -- SQL executes on the GPU: 
+    -- SQL is executed on the GPU: 
     set pg_strom.enabled=on;
     SELECT t1.c0 FROM t1 RIGHT OUTER JOIN t2 ON ((CAST(0.1 AS MONEY)) NOT IN (CAST(0.1 AS MONEY)));
     -- Result:
@@ -824,7 +824,7 @@
     CREATE SCHEMA extensions;
     CREATE EXTENSION pg_strom WITH SCHEMA extensions;
 
-    -- SQL executes on the CPU:
+    -- SQL is executed on the CPU:
     set pg_strom.enabled=off;
     SELECT SUM(t1.c0) FROM t1 LEFT OUTER JOIN t0 ON ((t0.c0)IS DISTINCT FROM(CAST(1.0E1 AS MONEY))) WHERE (t0.c1) IS NULL;
     -- Result:
@@ -833,7 +833,7 @@
         
     (1 row)
 
-    -- SQL executes on the GPU: 
+    -- SQL is executed on the GPU: 
     set pg_strom.enabled=on;
     SELECT SUM(t1.c0) FROM t1 LEFT OUTER JOIN t0 ON ((t0.c0)IS DISTINCT FROM(CAST(1.0E1 AS MONEY))) WHERE (t0.c1) IS NULL;
     -- Result:
@@ -863,7 +863,7 @@
     CREATE SCHEMA extensions;
     CREATE EXTENSION pg_strom WITH SCHEMA extensions;
 
-    -- SQL executes on the CPU:
+    -- SQL is executed on the CPU:
     set pg_strom.enabled=off;
     SELECT MIN(t2.c0)
     FROM t2
@@ -878,7 +878,7 @@
        1
     (1 row)
 
-    -- SQL executes on the GPU: 
+    -- SQL is executed on the GPU: 
     set pg_strom.enabled=on;
     SELECT MIN(t2.c0)
     FROM t2
@@ -913,7 +913,7 @@
     CREATE SCHEMA extensions;
     CREATE EXTENSION pg_strom WITH SCHEMA extensions;
 
-    -- SQL executes on the CPU:
+    -- SQL is executed on the CPU:
     set pg_strom.enabled=off;
     SELECT MIN(1) FROM t1 GROUP BY t1.c0 HAVING NOT (MIN(1))::BOOLEAN;
     -- Result:
@@ -921,7 +921,7 @@
     -----
     (0 rows)
 
-    -- SQL executes on the GPU: 
+    -- SQL is executed on the GPU: 
     set pg_strom.enabled=on;
     SELECT MIN(1) FROM t1 GROUP BY t1.c0 HAVING NOT (MIN(1))::BOOLEAN;
     -- Result:
@@ -950,7 +950,7 @@
     CREATE SCHEMA extensions;
     CREATE EXTENSION pg_strom WITH SCHEMA extensions;
 
-    -- SQL executes on the CPU:
+    -- SQL is executed on the CPU:
     set pg_strom.enabled=off;
     SELECT * FROM t1, t0 WHERE ((t1.c1) IS NOT DISTINCT FROM (t0.c1)) IS TRUE;
     -- Result:
@@ -960,7 +960,7 @@
       1 |  0 |  1 |  0
     (2 rows)
 
-    -- SQL executes on the GPU: 
+    -- SQL is executed on the GPU: 
     set pg_strom.enabled=on;
     SELECT * FROM t1, t0 WHERE ((t1.c1) IS NOT DISTINCT FROM (t0.c1)) IS TRUE;
     -- Result:
@@ -990,7 +990,7 @@
     CREATE SCHEMA extensions;
     CREATE EXTENSION pg_strom WITH SCHEMA extensions;
 
-    -- SQL executes on the CPU:
+    -- SQL is executed on the CPU:
     set pg_strom.enabled=off;
     SELECT t1.c0 FROM t2, t1 WHERE (t2.c0) BETWEEN SYMMETRIC (t1.c0) AND ((0.9)::MONEY);
     -- Result:
@@ -1000,7 +1000,7 @@
      $0.50
     (1 row)
 
-    -- SQL executes on the GPU: 
+    -- SQL is executed on the GPU: 
     set pg_strom.enabled=on;
     SELECT t1.c0 FROM t2, t1 WHERE (t2.c0) BETWEEN SYMMETRIC (t1.c0) AND ((0.9)::MONEY);
     -- Result:
@@ -1029,7 +1029,7 @@
     CREATE SCHEMA extensions;
     CREATE EXTENSION pg_strom WITH SCHEMA extensions;
 
-    -- SQL executes on the CPU:
+    -- SQL is executed on the CPU:
     set pg_strom.enabled=off;
     SELECT * FROM t0,t1 WHERE ((t0.c0)::INT IS NOT DISTINCT FROM (t0.c0)) OR (t1.c0);
     -- Result:
@@ -1037,7 +1037,7 @@
     ----+----
     (0 rows)
 
-    -- SQL executes on the GPU: 
+    -- SQL is executed on the GPU: 
     set pg_strom.enabled=on;
     SELECT * FROM t0,t1 WHERE ((t0.c0)::INT IS NOT DISTINCT FROM (t0.c0)) OR (t1.c0);
     -- Result:
@@ -1295,13 +1295,13 @@
     CREATE TABLE IF NOT EXISTS t0(c0 INT, c1 INT);
     INSERT INTO t0(c1, c0) VALUES(-2016839045, 8138);
 
-    -- SQL executes on the CPU: 
+    -- SQL is executed on the CPU: 
     ALTER SESSION SET EXECUTOR_DEVICE='CPU';
     SELECT t0.c0 FROM t0 WHERE (t0.c0) NOT IN (t0.c1+t0.c1, t0.c0);
     -- Result:
     No rows returned.
 
-    -- SQL executes on the GPU: 
+    -- SQL is executed on the GPU: 
     ALTER SESSION SET EXECUTOR_DEVICE='GPU';
     SELECT t0.c0 FROM t0 WHERE (t0.c0) NOT IN (t0.c1+t0.c1, t0.c0);
     -- Result:
@@ -1324,7 +1324,7 @@
     CREATE TABLE t0(c0 INT);
     INSERT INTO t0(c0) VALUES(749466197), (-1013771122), (-1575001538);
 
-    -- SQL executes on the CPU: 
+    -- SQL is executed on the CPU: 
     ALTER SESSION SET EXECUTOR_DEVICE='CPU';
     SELECT * FROM t0 WHERE ((t0.c0+t0.c0)<(t0.c0)) OR (t0.c0 = t0.c0);
     -- Result:
@@ -1332,7 +1332,7 @@
     749466197
     -1013771122
 
-    -- SQL executes on the GPU: 
+    -- SQL is executed on the GPU: 
     ALTER SESSION SET EXECUTOR_DEVICE='GPU';
     SELECT * FROM t0 WHERE ((t0.c0+t0.c0)<(t0.c0)) OR (t0.c0 = t0.c0);
     -- Result:
@@ -1356,13 +1356,13 @@
     ```sql
     CREATE TABLE t1(c0 integer NOT NULL, c2 TEXT);
 
-    -- SQL executes on the CPU: 
+    -- SQL is executed on the CPU: 
     ALTER SESSION SET EXECUTOR_DEVICE='CPU';
     SELECT * FROM t1 JOIN (SELECT ALL 0.42445757423087693 FROM t1) AS sub0 ON true WHERE NOT (t1.c2) NOT IN (t1.c2, t1.c2);
     -- Result:
     No rows returned.
 
-    -- SQL executes on the GPU: 
+    -- SQL is executed on the GPU: 
     ALTER SESSION SET EXECUTOR_DEVICE='GPU';
     SELECT * FROM t1 JOIN (SELECT ALL 0.42445757423087693 FROM t1) AS sub0 ON true WHERE NOT (t1.c2) NOT IN (t1.c2, t1.c2);
     -- Result:
@@ -1385,13 +1385,13 @@
     CREATE TABLE IF NOT EXISTS t0(c0 INTEGER NULL);
     INSERT INTO t0(c0) VALUES(1707341980);
 
-    -- SQL executes on the CPU: 
+    -- SQL is executed on the CPU: 
     ALTER SESSION SET EXECUTOR_DEVICE='CPU';
     SELECT ALL t0.c0 FROM t0 WHERE CAST(t0.c0+t0.c0 AS BOOLEAN) IS FALSE IS NULL;
     -- Result:
     No rows returned.
 
-    -- SQL executes on the GPU: 
+    -- SQL is executed on the GPU: 
     ALTER SESSION SET EXECUTOR_DEVICE='GPU';
     SELECT ALL t0.c0 FROM t0 WHERE CAST(t0.c0+t0.c0 AS BOOLEAN) IS FALSE IS NULL;
     -- Result:
@@ -1416,7 +1416,7 @@
     CREATE TABLE IF NOT EXISTS t0(c0 DOUBLE  NULL);
     INSERT INTO t0(c0) VALUES(0), (1), ('Infinity');
 
-    -- SQL executes on the CPU: 
+    -- SQL is executed on the CPU: 
     ALTER SESSION SET EXECUTOR_DEVICE='CPU';
     SELECT CAST(t0.c0 AS INT) FROM t0;
     -- Result:
@@ -1425,7 +1425,7 @@
     1
     null
 
-    -- SQL executes on the GPU: 
+    -- SQL is executed on the GPU: 
     ALTER SESSION SET EXECUTOR_DEVICE='GPU';
     SELECT CAST(t0.c0 AS INT) FROM t0;
     -- Result:
@@ -1453,7 +1453,7 @@
     INSERT INTO t0 VALUES(0,0),(-25151,null),(4115,-62),(4165,62),(-16256,null),(-115,-62),(11215,62);
     INSERT INTO t1 VALUES(1, 0.71818817),(0, -3.896708E7), (1, 0.9509316), (1, 8.043511E8),(1, 0.585598),(1,null),(null,9.1319142E8);
 
-    -- SQL executes on the CPU: 
+    -- SQL is executed on the CPU: 
     ALTER SESSION SET EXECUTOR_DEVICE='CPU';
     SELECT DISTINCT t0.c0,t1.c1 FROM t0, t1  ORDER BY 1 desc limit 10;
     -- Result:
@@ -1469,7 +1469,7 @@
     4165|0.7181882
     4165|NULL
 
-    -- SQL executes on the GPU: 
+    -- SQL is executed on the GPU: 
     ALTER SESSION SET EXECUTOR_DEVICE='GPU'
     SELECT DISTINCT t0.c0,t1.c1 FROM t0, t1  ORDER BY 1 desc limit 10;
     -- Result:
@@ -1502,14 +1502,14 @@
     CREATE TABLE t0(c0 DECIMAL(2) NULL, c1 DOUBLE);
     INSERT INTO t0(c1) VALUES(0.20684618710775926),(1.7976931348623157E308);
 
-    -- SQL executes on the CPU: 
+    -- SQL is executed on the CPU: 
     ALTER SESSION SET EXECUTOR_DEVICE='CPU';
     SELECT DISTINCT t0.c1 FROM t0 WHERE CAST(t0.c1 AS INT) != 1;
     -- Result:
     c1
     0.2068461871077593
 
-    -- SQL executes on the GPU: 
+    -- SQL is executed on the GPU: 
     ALTER SESSION SET EXECUTOR_DEVICE='GPU';
     SELECT DISTINCT t0.c1 FROM t0 WHERE CAST(t0.c1 AS INT) != 1;
     -- Result:
