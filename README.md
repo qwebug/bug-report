@@ -772,7 +772,7 @@
 
     ***URL:*** <https://github.com/heterodb/pg-strom/issues/628>
 
-    ***Brief Description:***   *SELECT \<column> FROM JOIN tables ON (CAST(\<decimal> AS MONEY))* * *brings different results, when turn on and off pg\_strom.enabled.
+    ***Brief Description:***   *SELECT \<column> FROM JOIN tables ON (CAST(\<decimal> AS MONEY))*  brings different results, when turn on and off pg\_strom.enabled.
 
     ***Status:*** Fixed
 
