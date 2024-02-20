@@ -1813,22 +1813,22 @@
     c.create_table('t0', t0, gpu=False)
     c.create_table('t0_gpu', t0, gpu=True)
 
-    print('Result1:')
+    print('CPU Result:')
     result1= c.sql("SELECT -2613 FROM t0 HAVING (TIMESTAMP '1991-02-28 13:42:12' NOT BETWEEN TIMESTAMP '1985-12-14 23:59:41' AND MAX(TIMESTAMP '2006-08-05 07:29:26'))").compute()
     print(result1)
 
-    print('Result2:')
+    print('GPU Result:')
     result2= c.sql("SELECT -2613 FROM t0_gpu HAVING (TIMESTAMP '1991-02-28 13:42:12' NOT BETWEEN TIMESTAMP '1985-12-14 23:59:41' AND MAX(TIMESTAMP '2006-08-05 07:29:26'))").compute()
     print(result2)
     ```
 
     ```bash
     INFO:numba.cuda.cudadrv.driver:init
-    Result1:
+    CPU Result:
     Empty DataFrame
     Columns: [Int64(-2613)]
     Index: []
-    Result2:
+    GPU Result:
     Traceback (most recent call last):
       File "/opt/conda/envs/rapids/lib/python3.10/site-packages/dask/dataframe/utils.py", line 193, in raise_on_meta_error
         yield
@@ -2353,21 +2353,21 @@
     c.create_table('t0', t0, gpu=False)
     c.create_table('t0_gpu', t0, gpu=True)
 
-    print('Result1:')
+    print('CPU Result:')
     result1= c.sql("SELECT (('b햦]D7Jr31')||((CASE 'Kx}lzJ^' WHEN t0.c1 THEN '' END ))) FROM t0").compute()
     print(result1)
 
-    print('Result2:')
+    print('GPU Result:')
     result2= c.sql("SELECT (('b햦]D7Jr31')||((CASE 'Kx}lzJ^' WHEN t0_gpu.c1 THEN '' END ))) FROM t0_gpu").compute()
     print(result2)
     ```
 
     ```bash
     INFO:numba.cuda.cudadrv.driver:init
-    Result1:
+    CPU Result:
       Utf8("b햦]D7Jr31") || CASE Utf8("Kx}lzJ^") WHEN t0.c1 THEN Utf8("") END
     0                                                NaN                    
-    Result2:
+    GPU Result:
     Traceback (most recent call last):
       File "/opt/conda/envs/rapids/lib/python3.10/site-packages/cudf/core/indexed_frame.py", line 2180, in _apply
         kernel, retty = _compile_or_get(
@@ -2478,21 +2478,21 @@
     c.create_table('t1', t1, gpu=False)
     c.create_table('t1_gpu', t1, gpu=True)
 
-    print('Result1:')
+    print('CPU Result:')
     result1= c.sql("SELECT (((t1.c1 LIKE '\뽞^' ESCAPE 'M')) IS NULL) FROM t0, t1").compute()
     print(result1)
 
-    print('Result2:')
+    print('GPU Result:')
     result2= c.sql("SELECT (((t1_gpu.c1 LIKE '\뽞^' ESCAPE 'M')) IS NULL) FROM t0_gpu, t1_gpu").compute()
     print(result2)
     ```
 
     ```bash
     INFO:numba.cuda.cudadrv.driver:init
-    Result1:
+    CPU Result:
        t1.c1 LIKE Utf8("\뽞^") CHAR 'M' IS NULL
     0                                    False
-    Result2:
+    GPU Result:
     Traceback (most recent call last):
       File "/tmp/bug18/bug18.py", line 32, in <module>
         result2= c.sql("SELECT (((t1_gpu.c1 LIKE '\뽞^' ESCAPE 'M')) IS NULL) FROM t0_gpu, t1_gpu").compute()
@@ -2665,10 +2665,10 @@
 
     ```bash
     INFO:numba.cuda.cudadrv.driver:init
-    Result1:
+    CPU Result:
        CASE CASE Int64(1) WHEN t0.c1 THEN Float64(1) END WHEN Float64(0.1) THEN Int64(47) ELSE t0.c1 END
     0                                           0.692672                                                
-    Result2:
+    GPU Result:
        CASE CASE Int64(1) WHEN t0_gpu.c1 THEN Float64(1) END WHEN Float64(0.1) THEN Int64(47) ELSE t0_gpu.c1 END
     0                                               47.0                                                        
     INFO:numba.cuda.cudadrv.driver:add pending dealloc: module_unload ? bytes
